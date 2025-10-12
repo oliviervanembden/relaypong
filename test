@@ -1,0 +1,62 @@
+# main.py
+import sim
+
+# -------- Nets --------
+A  = sim.wire()
+B  = sim.wire()
+C  = sim.wire()
+D  = sim.wire()
+E  = sim.wire()
+F  = sim.wire()
+G  = sim.wire()
+H  = sim.wire()
+S  = sim.wire()   # Sum net
+CL = sim.wire()   # Carry LED net (after diodes)
+
+# -------- Buttons (inputs) --------
+A_BTN  = sim.button(A)
+B_BTN  = sim.button(B)
+C_BTN  = sim.button(C)
+
+# -------- LEDs --------
+LED_S  = sim.led(S)
+LED_CL = sim.led(CL)
+
+# -------- Diodes --------
+# D1: from E -> CL
+D1 = sim.diode(E, CL)
+# D2: from G -> CL
+D2 = sim.diode(G, CL)
+
+# -------- Relays --------
+# R1 was: sim.relay(A, B, D, E)
+R1 = sim.relay(A, D, B, E)   # coil=A, COM=D, NC=B, NO=E
+
+# R2 was: sim.relay(B, H, A, D)
+R2 = sim.relay(B, H, D, E)   # coil=B, COM=H, NC=D, NO=E
+# R3: coil=C,  COM=H,  NC=F,  NO=G
+R3 = sim.relay(C, H, F, G)
+# R4: coil=H,  COM=S,  NC=C,  NO=F
+R4 = sim.relay(H, S, C, F)
+
+# -------- Simple driver to test --------
+def propagate(tokens):
+    sim.check(tokens)
+
+def set_inputs(a, b, c):
+    tokens = []
+    tokens.extend(A_BTN.press() if a else A_BTN.release())
+    tokens.extend(B_BTN.press() if b else B_BTN.release())
+    tokens.extend(C_BTN.press() if c else C_BTN.release())
+    propagate(tokens)
+
+def show(a, b, c):
+    set_inputs(a, b, c)
+    print(f"A={a} B={b} C={c}  ->  S={S.power}  CL={CL.power}")
+
+if __name__ == "__main__":
+    # Exhaustive test of 1-bit inputs
+    for a in (0, 1):
+        for b in (0, 1):
+            for c in (0, 1):
+                show(a, b, c)
